@@ -8,7 +8,7 @@ const apiurl = "http://localhost:8000/api/posts/";
 function PostList() {
   const [postList, setPostList] = useState([]);
   useEffect(() => {
-    // Axios : 400대 성공 , 그 외 특이 상태코드 에러 처리
+    // Axios : Node.js에서의 API 통신 방법 400대 성공 , 그 외 특이 상태코드 에러 처리
     Axios.get(apiurl)
       .then((response) => {
         const { data } = response;
