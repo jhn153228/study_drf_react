@@ -1,77 +1,105 @@
 import React, { useState, useEffect } from "react";
-import { Alert } from "antd";
+import { Form, Input, Button, notification } from "antd";
+import { SmileOutlined, FrownOutlined } from "@ant-design/icons";
 import { useHistory } from "react-router-dom";
 import Axios from "axios";
 
 export default function Signup() {
   const history = useHistory();
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const [inputs, setInputs] = useState({ username: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [formDisabled, setFormDisabled] = useState(true);
+  const onFinish = (values) => {
+    async function fn() {
+      const { username, password } = values;
 
-  /**리액트에서 권장하는 이벤트 값 받고 사용하는 방법
-   * <from /> 태그에서 onSubmit 으로 임의지정함수(onsubmit) 함수에 정보들을 보내줌
-   * 정보들을 e로 받아서 해당 값들을 핸들링
-   * preventDefault : a태그, submit 태그 등 누를 시 href를 통해 이동하거나 창이 새로고침 하는데
-   * 이를 방지하기 위함
-   */
+      setFieldErrors({});
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+      const data = { username, password };
+      // 예외처리
+      try {
+        await Axios.post("http://localhost:8000/accounts/signup/", data);
 
-    setLoading(true);
-    setErrors({});
+        notification.open({
+          message: "회원가입 성공",
+          description: "로그인 페이지로 이동합니다.",
+          icon: <SmileOutlined style={{ color: "#108ee9" }} />,
+        });
 
-    Axios.post("http://localhost:8000/accounts/signup/", inputs)
-      .then((response) => {
         history.push("/accounts/login");
-      })
-      .catch((error) => {
-        console.log("error :", error);
+      } catch (error) {
         if (error.response) {
-          setErrors({
-            username: (error.response.data.username || []).join(" "),
-            password: (error.response.data.password || []).join(" "),
+          notification.open({
+            message: "회원가입 실패",
+            description: "아이디/암호를 확인해주세요.",
+            icon: <FrownOutlined style={{ color: "#ff3333" }} />,
           });
+
+          const { data: fieldsErrorMessages } = error.response;
+          // fieldsErrorMessages => { username: "m1 m2", password: [] }
+          // python: mydict.items()
+          setFieldErrors(
+            Object.entries(fieldsErrorMessages).reduce(
+              (acc, [fieldName, errors]) => {
+                // errors : ["m1", "m2"].join(" ") => "m1 "m2"
+                acc[fieldName] = {
+                  validateStatus: "error",
+                  help: errors.join(" "),
+                };
+                return acc;
+              },
+              {}
+            )
+          );
         }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    const isEnabled = Object.values(inputs).every((s) => s.length > 0);
-    setFormDisabled(!isEnabled);
-  }, [inputs]);
-
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setInputs((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+      }
+    }
+    fn();
   };
 
   return (
-    <div>
-      <form onSubmit={onSubmit}>
-        <div>
-          <input type="text" name="username" onChange={onChange} />
-          {errors.username && <Alert type="error" message={errors.username} />}
-        </div>
-        <div>
-          <input type="password" name="password" onChange={onChange} />
-          {errors.password && <Alert type="error" message={errors.password} />}
-        </div>
-        <input
-          type="submit"
-          value="회원가입"
-          disabled={loading || formDisabled}
-        />
-      </form>
-    </div>
+    <Form
+      {...layout}
+      onFinish={onFinish}
+      //   onFinishFailed={onFinishFailed}
+      autoComplete={"false"}
+    >
+      <Form.Item
+        label="Username"
+        name="username"
+        // antd 사이트에서 Rule 확인 가능
+        rules={[
+          { required: true, message: "Please input your username!" },
+          { min: 5, message: "5글자 입력해주세요." },
+        ]}
+        hasFeedback
+        {...fieldErrors.username}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Password"
+        name="password"
+        rules={[{ required: true, message: "Please input your password!" }]}
+        {...fieldErrors.password}
+      >
+        <Input.Password />
+      </Form.Item>
+
+      <Form.Item {...tailLayout}>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }
+
+const layout = {
+  labelCol: { span: 8 },
+  wrapperCol: { span: 16 },
+};
+
+const tailLayout = {
+  wrapperCol: { offset: 8, span: 16 },
+};
