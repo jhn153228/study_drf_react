@@ -6,6 +6,20 @@ import StoryList from "./StoryList";
 import LogoImage from "assets/logo.png";
 
 function AppLayout({ children }) {
+  const menuItems = [
+    {
+      key: "menu1",
+      label: "메뉴1",
+    },
+    {
+      key: "menu2",
+      label: "메뉴2",
+    },
+    {
+      key: "menu3",
+      label: "메뉴3",
+    },
+  ];
   return (
     <div className="app">
       <div className="header">
@@ -16,11 +30,7 @@ function AppLayout({ children }) {
           <Input.Search />
         </div>
         <div className="topnav">
-          <Menu mode="horizontal">
-            <Menu.Item>메뉴1</Menu.Item>
-            <Menu.Item>메뉴2</Menu.Item>
-            <Menu.Item>메뉴3</Menu.Item>
-          </Menu>
+          <Menu mode="horizontal" items={menuItems} />
         </div>
       </div>
 
