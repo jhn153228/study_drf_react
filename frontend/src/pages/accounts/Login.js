@@ -3,14 +3,13 @@ import { Card, Form, Input, Button, notification } from "antd";
 import { SmileOutlined, FrownOutlined } from "@ant-design/icons";
 import { useHistory } from "react-router-dom";
 import Axios from "axios";
-import useLocalStorage from "utils/useLoacalStorage";
+import { useAppContext } from "store";
+import { setToken } from "store";
 
 export default function Login() {
+  const { dispatch } = useAppContext();
   const history = useHistory();
-  const [jwtToken, setJwtToken] = useLocalStorage("jwtToken", "");
   const [fieldErrors, setFieldErrors] = useState({});
-
-  console.log("loaded jwtToken: ", jwtToken);
 
   const onFinish = (values) => {
     async function fn() {
@@ -19,7 +18,6 @@ export default function Login() {
       setFieldErrors({});
 
       const data = { username, password };
-      // 예외처리
       try {
         const response = await Axios.post(
           "http://localhost:8000/accounts/token/",
@@ -29,16 +27,14 @@ export default function Login() {
           data: { token: jwtToken },
         } = response;
 
-        setJwtToken(jwtToken);
-
-        console.log("jwtToken: ", jwtToken);
+        dispatch(setToken(jwtToken));
 
         notification.open({
           message: "로그인 성공",
           icon: <SmileOutlined style={{ color: "#108ee9" }} />,
         });
 
-        // history.push("/accounts/login"); // TODO: 이동주소
+        // history.push("/accounts/login");  // TODO: 이동 주소
       } catch (error) {
         if (error.response) {
           notification.open({
@@ -68,8 +64,9 @@ export default function Login() {
     }
     fn();
   };
+
   return (
-    <Card>
+    <Card title="로그인">
       <Form
         {...layout}
         onFinish={onFinish}
@@ -79,7 +76,6 @@ export default function Login() {
         <Form.Item
           label="Username"
           name="username"
-          // antd 사이트에서 Rule 확인 가능
           rules={[
             { required: true, message: "Please input your username!" },
             { min: 5, message: "5글자 입력해주세요." },
