@@ -1,40 +1,26 @@
-import React, { useEffect, useState } from "react";
-import Axios from "axios";
+import React, { useState } from "react";
 import Post from "./Post";
 import { useAppContext } from "store";
 import { Alert } from "antd";
-
-const apiurl = "http://localhost:8000/api/posts/";
+import useAxios from "axios-hooks";
 
 function PostList() {
   const {
     store: { jwtToken },
-    dispatch,
   } = useAppContext();
-  const [postList, setPostList] = useState([]);
-  useEffect(() => {
-    // JWT를 통한 인증 : 헤더에 JWT토큰을 추가해 API 요청
-    const headers = { Authorization: `JWT ${jwtToken}` };
-    // Axios : Node.js에서의 API 통신 방법 400대 성공 , 그 외 특이 상태코드 에러 처리
-    Axios.get(apiurl, { headers })
-      .then((response) => {
-        const { data } = response;
-        console.log("loaded", response);
-        setPostList(data);
-      })
-      .catch((error) => {
-        // error.response();
-      });
-    console.log("mounted");
-  }, []);
+
+  const headers = { Authorization: `JWT ${jwtToken}` }; // JWT 인증
+  const [{ data: postList, loading, error }, refetch] = useAxios({
+    url: "http://localhost:8000/api/posts/",
+    headers,
+  });
+
   return (
     <div>
-      {postList.length === 0 && (
+      {postList && postList.length === 0 && (
         <Alert type="warning" message="포스팅이 없습니다." />
       )}
-      {postList.map((post) => (
-        <Post post={post} key={post.id} />
-      ))}
+      {postList && postList.map((post) => <Post post={post} key={post.id} />)}
     </div>
   );
 }

@@ -9,7 +9,12 @@ from .serializers import PostSerializer
 
 
 class PostViewSet(ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = (
+        # 쓸데없는 쿼리 줄이기 위함
+        Post.objects.all()
+        .select_related("author")
+        .prefetch_related("tag_set", "like_user_set")
+    )
     serializer_class = PostSerializer
 
     # permission_classes = [AllowAny]  # FIXME: 인증적용
