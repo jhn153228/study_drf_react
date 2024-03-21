@@ -3,7 +3,7 @@ import useReducerWithSideEffects, {
   UpdateWithSideEffect,
 } from "use-reducer-with-side-effects";
 import { getStorageItem, setStorageItem } from "utils/useLocalStorage";
-
+//TODO: 이해 잘 안감.. Reducer 복습 필요
 const AppContext = createContext();
 
 const reducer = (prevState, action) => {
@@ -11,12 +11,12 @@ const reducer = (prevState, action) => {
 
   if (type === SET_TOKEN) {
     const { payload: jwtToken } = action;
-    const newState = { ...prevState, jwtToken };
+    const newState = { ...prevState, jwtToken, isAuthenticated: true };
     return UpdateWithSideEffect(newState, (state, dispatch) => {
       setStorageItem("jwtToken", jwtToken);
     });
   } else if (type === DELETE_TOKEN) {
-    const newState = { ...prevState, jwtToken: "" };
+    const newState = { ...prevState, jwtToken: "", isAuthenticated: false };
     return UpdateWithSideEffect(newState, (state, dispatch) => {
       setStorageItem("jwtToken", "");
     });
@@ -26,8 +26,10 @@ const reducer = (prevState, action) => {
 };
 
 export const AppProvider = ({ children }) => {
+  const jwtToken = getStorageItem("jwtToken", "");
   const [store, dispatch] = useReducerWithSideEffects(reducer, {
-    jwtToken: getStorageItem("jwtToken", ""),
+    jwtToken,
+    isAuthenticated: jwtToken.length > 0,
   });
   return (
     <AppContext.Provider value={{ store, dispatch }}>
