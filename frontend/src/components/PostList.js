@@ -13,9 +13,10 @@ function PostList() {
   } = useAppContext();
   const [postList, setPostList] = useState([]);
   useEffect(() => {
-    // Axios : Node.js에서의 API 통신 방법 400대 성공 , 그 외 특이 상태코드 에러 처리
+    // JWT를 통한 인증 : 헤더에 JWT토큰을 추가해 API 요청
     const headers = { Authorization: `JWT ${jwtToken}` };
-    Axios.get(apiurl, {})
+    // Axios : Node.js에서의 API 통신 방법 400대 성공 , 그 외 특이 상태코드 에러 처리
+    Axios.get(apiurl, { headers })
       .then((response) => {
         const { data } = response;
         console.log("loaded", response);

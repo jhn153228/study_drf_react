@@ -19,5 +19,5 @@ class PostViewSet(ModelViewSet):
             Q(author=self.request.user) | # 작성자 이거나
             Q(author__in=self.request.user.follower_set.all()) # 작성자가 팔로잉 한 글을 필터링
         )
-        qs = qs.filter(created_at__gte=timesince)
+        # qs = qs.filter(created_at__gte=timesince)
         return qs
