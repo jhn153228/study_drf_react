@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third apps
     "corsheaders",
+    "django_pydenticon",
     "rest_framework",
     "rest_framework_jwt",
     # local apps
@@ -49,7 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware", # 크로스 도메인 허용
+    "corsheaders.middleware.CorsMiddleware",  # 크로스 도메인 허용
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
